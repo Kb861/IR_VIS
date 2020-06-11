@@ -22,7 +22,7 @@ function varargout = IR_VIS_APP(varargin)
 
 % Edit the above text to modify the response to help IR_VIS_APP
 
-% Last Modified by GUIDE v2.5 11-Jun-2020 20:51:19
+% Last Modified by GUIDE v2.5 11-Jun-2020 21:08:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,22 +78,113 @@ function uploadButtonIR_Callback(hObject, eventdata, handles)
 % hObject    handle to uploadButtonIR (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-try
-    [fileName, pathName] = uigetfile('*.PNG', 'All Files (*.*)');
-    global image
-    image.infoIR = [fileName, pathName];
-    image.imreadIR = imread([pathName, fileName]);
-end
+
+    indir=uigetdir;
+    handles.uploadButtonIR =char(indir);
+     
+    ListOfImageNames = {};
+    folder = handles.uploadButtonIR;
+    if length(folder) > 0 
+        if exist(folder,'dir') == false
+            msgboxw(['Folder ' folder ' does not exist.']);
+            return;
+        end
+
+    else
+        fprintf('No folder specified as input for function LoadImageList.\n');
+        WarnUser('No folder specified as input for function LoadImageList.');
+        return;
+    end
+    ImageFiles = dir([folder '\*.*']);
+    for Index = 1:length(ImageFiles)
+        baseFileName = ImageFiles(Index).name;
+        [folder2, name, extension] = fileparts(baseFileName);
+        extension = upper(extension);
+        switch lower(extension)
+       case {'.png'}          
+            ListOfImageNames = [ListOfImageNames baseFileName];
+        otherwise
+        end
+    end
+   set(handles.listboxIR,'string',ListOfImageNames,'Value',1);
+ 
 
 % --- Executes on button press in uploadButtonVIS.
 function uploadButtonVIS_Callback(hObject, eventdata, handles)
 % hObject    handle to uploadButtonVIS (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-try
-    [fileName, pathName] = uigetfile('*.JPG', 'All Files (*.*)');
-    global image
-    image.infoVIS = [fileName, pathName];
-    image.imreadVIS = imread([pathName, fileName]);
+    indir=uigetdir;
+    handles.uploadButtonVIS =char(indir);
+     
+    ListOfImageNames = {};
+    folder = handles.uploadButtonVIS;
+    if length(folder) > 0 
+        if exist(folder,'dir') == false
+            msgboxw(['Folder ' folder ' does not exist.']);
+            return;
+        end
 
+    else
+        fprintf('No folder specified as input for function LoadImageList.\n');
+        WarnUser('No folder specified as input for function LoadImageList.');
+        return;
+    end
+    ImageFiles = dir([folder '\*.*']);
+    for Index = 1:length(ImageFiles)
+        baseFileName = ImageFiles(Index).name;
+        [folder2, name, extension] = fileparts(baseFileName);
+        extension = upper(extension);
+        switch lower(extension)
+       case {'.jpg'}          
+            ListOfImageNames = [ListOfImageNames baseFileName];
+        otherwise
+        end
+    end
+   set(handles.listboxVIS,'string',ListOfImageNames,'Value',1);
+
+
+% --- Executes on selection change in listboxIR.
+function listboxIR_Callback(hObject, eventdata, handles)
+% hObject    handle to listboxIR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns listboxIR contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listboxIR
+
+
+% --- Executes during object creation, after setting all properties.
+function listboxIR_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listboxIR (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in listboxVIS.
+function listboxVIS_Callback(hObject, eventdata, handles)
+% hObject    handle to listboxVIS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns listboxVIS contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listboxVIS
+
+
+% --- Executes during object creation, after setting all properties.
+function listboxVIS_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listboxVIS (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
 end
