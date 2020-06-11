@@ -22,7 +22,7 @@ function varargout = IR_VIS_APP(varargin)
 
 % Edit the above text to modify the response to help IR_VIS_APP
 
-% Last Modified by GUIDE v2.5 11-Jun-2020 21:08:28
+% Last Modified by GUIDE v2.5 11-Jun-2020 23:42:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -83,10 +83,11 @@ function uploadButtonIR_Callback(hObject, eventdata, handles)
     handles.uploadButtonIR =char(indir);
      
     ListOfImageNames = {};
-    folder = handles.uploadButtonIR;
-    if length(folder) > 0 
-        if exist(folder,'dir') == false
-            msgboxw(['Folder ' folder ' does not exist.']);
+    global folderIR
+    folderIR = handles.uploadButtonIR;
+    if length(folderIR) > 0 
+        if exist(folderIR,'dir') == false
+            msgboxw(['Folder ' folderIR ' does not exist.']);
             return;
         end
 
@@ -95,7 +96,7 @@ function uploadButtonIR_Callback(hObject, eventdata, handles)
         WarnUser('No folder specified as input for function LoadImageList.');
         return;
     end
-    ImageFiles = dir([folder '\*.*']);
+    ImageFiles = dir([folderIR '\*.*']);
     for Index = 1:length(ImageFiles)
         baseFileName = ImageFiles(Index).name;
         [folder2, name, extension] = fileparts(baseFileName);
@@ -118,10 +119,11 @@ function uploadButtonVIS_Callback(hObject, eventdata, handles)
     handles.uploadButtonVIS =char(indir);
      
     ListOfImageNames = {};
-    folder = handles.uploadButtonVIS;
-    if length(folder) > 0 
-        if exist(folder,'dir') == false
-            msgboxw(['Folder ' folder ' does not exist.']);
+    global folderVIS
+    folderVIS = handles.uploadButtonVIS;
+    if length(folderVIS) > 0 
+        if exist(folderVIS,'dir') == false
+            msgboxw(['Folder ' folderVIS ' does not exist.']);
             return;
         end
 
@@ -130,7 +132,7 @@ function uploadButtonVIS_Callback(hObject, eventdata, handles)
         WarnUser('No folder specified as input for function LoadImageList.');
         return;
     end
-    ImageFiles = dir([folder '\*.*']);
+    ImageFiles = dir([folderVIS '\*.*']);
     for Index = 1:length(ImageFiles)
         baseFileName = ImageFiles(Index).name;
         [folder2, name, extension] = fileparts(baseFileName);
@@ -152,7 +154,18 @@ function listboxIR_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listboxIR contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listboxIR
-
+global folderIR
+selected_image_idx = get(handles.listboxIR, 'Value');
+all_image_names = cellstr( get(handles.listboxIR, 'String') );
+selected_image_names = all_image_names(selected_image_idx);
+num_selected = length(selected_image_names);
+for K = 1 : num_selected
+  this_name = selected_image_names{K};
+  this_image_file = fullfile(folderIR, this_name ); 
+  this_image = imread(this_image_file);
+  axes(handles.IRAxes);
+  imshow(this_image);
+end
 
 % --- Executes during object creation, after setting all properties.
 function listboxIR_CreateFcn(hObject, eventdata, handles)
@@ -175,7 +188,18 @@ function listboxVIS_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listboxVIS contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listboxVIS
-
+global folderVIS
+selected_image_idx = get(handles.listboxVIS, 'Value');
+all_image_names = cellstr( get(handles.listboxVIS, 'String') );
+selected_image_names = all_image_names(selected_image_idx);
+num_selected = length(selected_image_names);
+for K = 1 : num_selected
+  this_name = selected_image_names{K};
+  this_image_file = fullfile(folderVIS, this_name );
+  this_image = imread(this_image_file);
+  axes(handles.VISAxes);
+  imshow(this_image);
+end
 
 % --- Executes during object creation, after setting all properties.
 function listboxVIS_CreateFcn(hObject, eventdata, handles)
@@ -188,3 +212,23 @@ function listboxVIS_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes during object creation, after setting all properties.
+function IRAxes_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to IRAxes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(gca,'xtick',[])
+set(gca,'ytick',[])
+% Hint: place code in OpeningFcn to populate IRAxes
+
+
+% --- Executes during object creation, after setting all properties.
+function VISAxes_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to VISAxes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+set(gca,'xtick',[])
+set(gca,'ytick',[])
+% Hint: place code in OpeningFcn to populate VISAxes
