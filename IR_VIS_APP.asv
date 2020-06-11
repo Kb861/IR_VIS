@@ -78,12 +78,7 @@ function uploadButtonIR_Callback(hObject, eventdata, handles)
 % hObject    handle to uploadButtonIR (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-try
-    [fileName, pathName] = uigetfile('*.PNG', 'All Files (*.*)');
-    global image
-    image.infoIR = [fileName, pathName];
-    image.imreadIR = imread([pathName, fileName]);
-end
+
 
 % --- Executes on button press in uploadButtonVIS.
 function uploadButtonVIS_Callback(hObject, eventdata, handles)
@@ -91,9 +86,13 @@ function uploadButtonVIS_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 try
-    [fileName, pathName] = uigetfile('*.JPG', 'All Files (*.*)');
-    global image
-    image.infoVIS = [fileName, pathName];
-    image.imreadVIS = imread([pathName, fileName]);
-
+    [filename, path, filterindex] = uigetfile('*.JPG', 'All Files (*.*)');
+    global data
+    data.picVisInfo = [filename, path];
+    data.picVis = imread([path, filename]);
+    data.picVisLoaded = 1;
+    data.picVisPoints = 0;
+    axes(data.axes1);
+    imshow(data.picVis);
+    set(handles.textVisFileName,'String',filename);
 end
