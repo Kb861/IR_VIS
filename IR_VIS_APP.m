@@ -96,7 +96,7 @@ function uploadButtonIR_Callback(hObject, eventdata, handles)
         WarnUser('No folder specified as input for function LoadImageList.');
         return;
     end
-    ImageFiles = dir([folderIR '\*.*']);
+    ImageFiles = dir([folderIR '/*.*']);
     for Index = 1:length(ImageFiles)
         baseFileName = ImageFiles(Index).name;
         [folder2, name, extension] = fileparts(baseFileName);
@@ -132,7 +132,7 @@ function uploadButtonVIS_Callback(hObject, eventdata, handles)
         WarnUser('No folder specified as input for function LoadImageList.');
         return;
     end
-    ImageFiles = dir([folderVIS '\*.*']);
+    ImageFiles = dir([folderVIS '/*.*']);
     for Index = 1:length(ImageFiles)
         baseFileName = ImageFiles(Index).name;
         [folder2, name, extension] = fileparts(baseFileName);
@@ -155,6 +155,7 @@ function listboxIR_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns listboxIR contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listboxIR
 global folderIR
+global this_image_IR
 selected_image_idx = get(handles.listboxIR, 'Value');
 all_image_names = cellstr( get(handles.listboxIR, 'String') );
 selected_image_names = all_image_names(selected_image_idx);
@@ -162,9 +163,9 @@ num_selected = length(selected_image_names);
 for K = 1 : num_selected
   this_name = selected_image_names{K};
   this_image_file = fullfile(folderIR, this_name ); 
-  this_image = imread(this_image_file);
+  this_image_IR = imread(this_image_file);
   axes(handles.IRAxes);
-  imshow(this_image);
+  imshow(this_image_IR);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -189,6 +190,7 @@ function listboxVIS_Callback(hObject, eventdata, handles)
 % Hints: contents = cellstr(get(hObject,'String')) returns listboxVIS contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listboxVIS
 global folderVIS
+global this_image_VIS
 selected_image_idx = get(handles.listboxVIS, 'Value');
 all_image_names = cellstr( get(handles.listboxVIS, 'String') );
 selected_image_names = all_image_names(selected_image_idx);
@@ -196,9 +198,9 @@ num_selected = length(selected_image_names);
 for K = 1 : num_selected
   this_name = selected_image_names{K};
   this_image_file = fullfile(folderVIS, this_name );
-  this_image = imread(this_image_file);
+  this_image_VIS = imread(this_image_file);
   axes(handles.VISAxes);
-  imshow(this_image);
+  imshow(this_image_VIS);
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -239,17 +241,112 @@ function markersBtn1_Callback(hObject, eventdata, handles)
 % hObject    handle to markersBtn1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global xIR;
+global yIR;
 
+n=1;
+while n < 5
+[xIR(n),yIR(n)] = ginput(1);
+hold(handles.IRAxes,'on'); 
+drawnow;
+plot(xIR(n), yIR(n), 'yo', 'MarkerSize', 10);
+n=n+1;
+end
 
 % --- Executes on button press in markersBtn2.
 function markersBtn2_Callback(hObject, eventdata, handles)
 % hObject    handle to markersBtn2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+n=1;
+global xVIS;
+global yVIS;
 
+while n < 5
+[xVIS(n),yVIS(n)] = ginput(1);
+hold(handles.VISAxes,'on'); 
+drawnow;
+plot(xVIS(n), yVIS(n), 'yo', 'MarkerSize', 10);
+n=n+1;
+end
 
 % --- Executes on button press in calibrateBtn.
 function calibrateBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to calibrateBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global xIR;
+global yIR;
+global xVIS;
+global yVIS;
+global this_image_VIS;
+global this_image_IR;
+
+[y, x, z] = size(this_image_VIS);
+picture_Vis = uint8(zeros(y*2, x*2, z));
+picture_Vis(floor(y/2):y+floor(y/2)-1, floor(x/2):x+floor(x/2)-1, :) = this_image_VIS;
+picture_Vis_X = xVIS + floor(x/2)-1;
+picture_Vis_Y = yVIS + floor(y/2)-1;
+    
+VisMinX = find(picture_Vis_X == min(picture_Vis_X));
+VisMaxX = find(picture_Vis_X == max(picture_Vis_X));
+VisMinY = find(picture_Vis_Y == min(picture_Vis_Y));
+VisMaxY = find(picture_Vis_Y == max(picture_Vis_Y));
+    
+IrMinX = find(xIR == min(xIR));
+IrMaxX = find(xIR == max(xIR));
+IrMinY = find(yIR == min(yIR));
+IrMaxY = find(yIR == max(yIR));   
+IrX = picture_Vis_X(VisMinX) - xIR(IrMinX);
+IrXResult = xIR + IrX;
+    
+VisXDist = picture_Vis_X(VisMaxX) - picture_Vis_X(VisMinX);
+IrXDist = xIR(IrMaxX) - xIR(IrMinX);
+AsX = mean(IrXDist) / mean(VisXDist);  
+[y,x,z] = size(picture_Vis);
+VisCropXres = picture_Vis_X * AsX;        
+IrY = mean(picture_Vis_Y(VisMinY)) - mean(yIR(IrMinY));
+IrYResult = yIR + IrY;
+VisYDist = picture_Vis_Y(VisMaxY) - picture_Vis_Y(VisMinY);
+IrYDist = yIR(IrMaxY) - yIR(IrMinY);
+AsY = mean(IrYDist) / mean(VisYDist);
+VisCropYres = picture_Vis_Y * AsY;
+    
+mergerdIMG = [];
+mergerdIMG = imresize(picture_Vis, [y*AsY, x*AsX]);
+    
+IrMeanX = mean(xIR);
+IrMeanY = mean(yIR);
+VisMeanX = mean(VisCropXres);
+VisMeanY = mean(VisCropYres);  
+difX = abs(VisMeanX) - abs(IrMeanX);
+difY = abs(VisMeanY) - abs(IrMeanY);
+[y,x,z] = size(this_image_IR);  
+[y1, x1, z1] = size(mergerdIMG);
+    
+maxX = x+difX-1;
+maxY = y+difY-1;
+if maxY > y1
+	yDiff = maxY - y;
+	maxY = y1 - 1;
+end
+if maxX > x1
+	xDiff = maxX - x;
+	maxX = x1 - 1;
+end
+    
+croppedVis = mergerdIMG(difY:maxY, difX:maxX, :);       
+[y,x,z] = size(this_image_IR);
+maskProg = ones(y,x);
+level = graythresh(this_image_IR(:,:,1));
+maskProg = im2bw(this_image_IR(:,:,1), level);
+maskProg3 = repmat(maskProg, [1, 1, 3]);
+imCropMasked = croppedVis;
+imCropMasked(~maskProg3) = 0;
+VisPlusIr = imCropMasked;
+VisPlusIr(:,:,1) =  VisPlusIr(:,:,1)/2 + this_image_IR(:,:,1)/2 ;
+VisPlusIr(:,:,2) = VisPlusIr(:,:,2)/2 + this_image_IR(:,:,2)/2 ;
+VisPlusIr(:,:,3) = VisPlusIr(:,:,3)/2 + this_image_IR(:,:,3)/2 ;
+
+axes(handles.IRVISAxes);
+imshow(VisPlusIr);
