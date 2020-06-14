@@ -22,7 +22,7 @@ function varargout = IR_VIS_APP(varargin)
 
 % Edit the above text to modify the response to help IR_VIS_APP
 
-% Last Modified by GUIDE v2.5 11-Jun-2020 23:42:17
+% Last Modified by GUIDE v2.5 14-Jun-2020 12:41:11
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -232,3 +232,24 @@ function VISAxes_CreateFcn(hObject, eventdata, handles)
 set(gca,'xtick',[])
 set(gca,'ytick',[])
 % Hint: place code in OpeningFcn to populate VISAxes
+
+
+% --- Executes on button press in markersBtn1.
+function markersBtn1_Callback(hObject, eventdata, handles)
+% hObject    handle to markersBtn1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in markersBtn2.
+function markersBtn2_Callback(hObject, eventdata, handles)
+% hObject    handle to markersBtn2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in calibrateBtn.
+function calibrateBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to calibrateBtn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
