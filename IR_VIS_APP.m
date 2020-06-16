@@ -22,7 +22,7 @@ function varargout = IR_VIS_APP(varargin)
 
 % Edit the above text to modify the response to help IR_VIS_APP
 
-% Last Modified by GUIDE v2.5 14-Jun-2020 12:41:11
+% Last Modified by GUIDE v2.5 16-Jun-2020 22:56:14
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -350,3 +350,99 @@ VisPlusIr(:,:,3) = VisPlusIr(:,:,3)/2 + this_image_IR(:,:,3)/2 ;
 
 axes(handles.IRVISAxes);
 imshow(VisPlusIr);
+
+
+% --- Executes on button press in stat1Btn.
+function stat1Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to stat1Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+IM1=getimage(handles.IRAxes);
+IM2=getimage(handles.IRVISAxes);
+IM3=getimage(handles.TransforAxes);
+R1=get(handles.histBtn,'Value')
+if(R1 == 1)
+Red = IM1(:,:,1);
+axes(handles.origAxes);
+imhist(Red);
+
+Red2 = IM2(:,:,1);
+axes(handles.trans1Axes);
+imhist(Red2);
+
+Red3 = IM2(:,:,1);
+axes(handles.trans2Axes);
+imhist(Red3);
+
+end
+R2=get(handles.minMaxBtn,'Value')
+if(R2 == 1)
+Blue1 = IM1(:,:,3);
+axes(handles.origAxes);
+imhist(Blue1);
+
+Blue2 = IM2(:,:,3);
+axes(handles.trans1Axes);
+imhist(Blue2);
+
+Blue3 = IM2(:,:,3);
+axes(handles.trans2Axes); 
+imhist(Blue3);
+
+end
+R3=get(handles.greenBtn,'Value')
+if(R3 == 1)
+Green1 = IM1(:,:,2);
+axes(handles.origAxes);
+imhist(Green1);
+
+Green2 = IM2(:,:,2);
+axes(handles.trans1Axes);
+imhist(Green2);
+
+Green3 = IM2(:,:,2);
+axes(handles.trans2Axes); 
+imhist(Green3);
+
+end
+guidata(hObject, handles);
+% --- Executes on button press in stat2Btn.
+function stat2Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to stat2Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in trans2Btn.
+function trans2Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to trans2Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in next1Btn.
+function next1Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to next1Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in next2Btn.
+function next2Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to next2Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in prev1Btn.
+function prev1Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to prev1Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in prev2Btn.
+function prev2Btn_Callback(hObject, eventdata, handles)
+% hObject    handle to prev2Btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
