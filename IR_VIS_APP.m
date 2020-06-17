@@ -22,7 +22,7 @@ function varargout = IR_VIS_APP(varargin)
 
 % Edit the above text to modify the response to help IR_VIS_APP
 
-% Last Modified by GUIDE v2.5 16-Jun-2020 22:56:14
+% Last Modified by GUIDE v2.5 17-Jun-2020 20:56:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -279,8 +279,24 @@ global xIR;
 global yIR;
 global xVIS;
 global yVIS;
-global this_image_VIS;
-global this_image_IR;
+global folderVIS
+global folderIR
+global data2
+listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
+listBoxStrings2 = cellstr(get(handles.listboxIR,'String'));
+ 
+ 
+
+
+num_selected = length(listBoxStrings);
+for K = 1 : num_selected
+  this_name = listBoxStrings{K};
+  this_image_file = fullfile(folderVIS, this_name ); 
+   this_image_VIS = imread(this_image_file);
+
+    this_name = listBoxStrings2{K};
+  this_image_file = fullfile(folderIR, this_name ); 
+   this_image_IR = imread(this_image_file);
 
 [y, x, z] = size(this_image_VIS);
 picture_Vis = uint8(zeros(y*2, x*2, z));
@@ -347,9 +363,10 @@ VisPlusIr = imCropMasked;
 VisPlusIr(:,:,1) =  VisPlusIr(:,:,1)/2 + this_image_IR(:,:,1)/2 ;
 VisPlusIr(:,:,2) = VisPlusIr(:,:,2)/2 + this_image_IR(:,:,2)/2 ;
 VisPlusIr(:,:,3) = VisPlusIr(:,:,3)/2 + this_image_IR(:,:,3)/2 ;
-
+data2(K).data=VisPlusIr;
+end
 axes(handles.IRVISAxes);
-imshow(VisPlusIr);
+imshow(data2(1).data);
 
 
 % --- Executes on button press in stat1Btn.
@@ -370,7 +387,7 @@ Red2 = IM2(:,:,1);
 axes(handles.trans1Axes);
 imhist(Red2);
 
-Red3 = IM2(:,:,1);
+Red3 = IM3(:,:,1);
 axes(handles.trans2Axes);
 imhist(Red3);
 
@@ -385,7 +402,7 @@ Blue2 = IM2(:,:,3);
 axes(handles.trans1Axes);
 imhist(Blue2);
 
-Blue3 = IM2(:,:,3);
+Blue3 = IM3(:,:,3);
 axes(handles.trans2Axes); 
 imhist(Blue3);
 
@@ -400,7 +417,7 @@ Green2 = IM2(:,:,2);
 axes(handles.trans1Axes);
 imhist(Green2);
 
-Green3 = IM2(:,:,2);
+Green3 = IM3(:,:,2);
 axes(handles.trans2Axes); 
 imhist(Green3);
 
@@ -422,23 +439,27 @@ global xVIS;
 global yVIS;
 points = [xVIS; yVIS]';
 global folderVIS
-J=getimage(handles.IRAxes);
-I=getimage(handles.VISAxes);
+global data1
 listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
-images = [];
+this_name = listBoxStrings{1};
+this_image_file = fullfile(folderVIS, this_name ); 
+this_image2 = imread(this_image_file);
+data1(1).data= this_image2;
 num_selected = length(listBoxStrings);
-for K = 4 : num_selected
+tform = fitgeotrans(points,points,'NonreflectiveSimilarity');
+axes(handles.TransforAxes);
+imshow(data1(1).data);
+for K = 2 : num_selected
   this_name = listBoxStrings{K};
   this_image_file = fullfile(folderVIS, this_name ); 
   this_image = imread(this_image_file);
-  this_image2 = imresize(this_image, 0.7);
-  images = [images,this_image2];
+  Jregistered = imwarp(this_image,tform);
+  I=imshowpair(Jregistered,this_image2);
+  data1(K).data= im2uint8(I.CData);
 end
-tform = fitgeotrans(points,points,'NonreflectiveSimilarity')
 
-Jregistered = imwarp(J,tform);
-figure
-imshowpair(J,Jregistered)
+
+imshow(data1(1).data);
 
 % --- Executes on button press in next1Btn.
 function next1Btn_Callback(hObject, eventdata, handles)
@@ -466,3 +487,53 @@ function prev2Btn_Callback(hObject, eventdata, handles)
 % hObject    handle to prev2Btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on slider movement.
+function slider1_Callback(hObject, eventdata, handles)
+% hObject    handle to slider1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+global data2
+x = int32(get(hObject, 'Value'));
+axes(handles.IRVISAxes);
+imshow(data2(x).data);
+
+% --- Executes during object creation, after setting all properties.
+function slider1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
+
+
+% --- Executes on slider movement.
+function slider2_Callback(hObject, eventdata, handles)
+% hObject    handle to slider2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'Value') returns position of slider
+%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
+global data1
+x = int32(get(hObject, 'Value'));
+axes(handles.TransforAxes);
+imshow(data1(x).data);
+
+% --- Executes during object creation, after setting all properties.
+function slider2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to slider2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: slider controls usually have a light gray background.
+if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor',[.9 .9 .9]);
+end
