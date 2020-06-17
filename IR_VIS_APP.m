@@ -418,7 +418,27 @@ function trans2Btn_Callback(hObject, eventdata, handles)
 % hObject    handle to trans2Btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global xVIS;
+global yVIS;
+points = [xVIS; yVIS]';
+global folderVIS
+J=getimage(handles.IRAxes);
+I=getimage(handles.VISAxes);
+listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
+images = [];
+num_selected = length(listBoxStrings);
+for K = 4 : num_selected
+  this_name = listBoxStrings{K};
+  this_image_file = fullfile(folderVIS, this_name ); 
+  this_image = imread(this_image_file);
+  this_image2 = imresize(this_image, 0.7);
+  images = [images,this_image2];
+end
+tform = fitgeotrans(points,points,'NonreflectiveSimilarity')
 
+Jregistered = imwarp(J,tform);
+figure
+imshowpair(J,Jregistered)
 
 % --- Executes on button press in next1Btn.
 function next1Btn_Callback(hObject, eventdata, handles)
