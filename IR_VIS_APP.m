@@ -435,31 +435,64 @@ function trans2Btn_Callback(hObject, eventdata, handles)
 % hObject    handle to trans2Btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global xVIS;
-global yVIS;
-points = [xVIS; yVIS]';
-global folderVIS
-global data1
-listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
-this_name = listBoxStrings{1};
-this_image_file = fullfile(folderVIS, this_name ); 
-this_image2 = imread(this_image_file);
-data1(1).data= this_image2;
-num_selected = length(listBoxStrings);
-tform = fitgeotrans(points,points,'NonreflectiveSimilarity');
-axes(handles.TransforAxes);
-imshow(data1(1).data);
-for K = 2 : num_selected
-  this_name = listBoxStrings{K};
-  this_image_file = fullfile(folderVIS, this_name ); 
-  this_image = imread(this_image_file);
-  Jregistered = imwarp(this_image,tform);
-  I=imshowpair(Jregistered,this_image2);
-  data1(K).data= im2uint8(I.CData);
+
+ global data1
+ global folderVIS
+% global differential
+ 
+  listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
+  getFirstImage = listBoxStrings{1};
+  this_image_file1 = fullfile(folderVIS, getFirstImage ); 
+  readFirstImage = imread(this_image_file1);
+  axes(handles.TransforAxes);
+  imshow(readFirstImage);
+  [x, rect] = imcrop(readFirstImage) ;
+  num_selected = length(listBoxStrings);
+
+for K = 1 : num_selected
+     this_name = listBoxStrings{K};
+     this_image_file = fullfile(folderVIS, this_name ); 
+     readFirstImage = imread(this_image_file);
+
+     readFirstImage = imcrop(readFirstImage,rect) ;           % crop image 
+     [filepath,name,ext] = fileparts(this_image_file) ;
+     imwrite(readFirstImage,strcat(name,'cropped',ext)) ;   % Save image 
+
 end
+ first = imread('_MG_1464cropped.JPG');
+ axes(handles.TransforAxes);
+ imshow(first);
+ n=1;
+ global xVIS;
+ global yVIS;
 
-
-imshow(data1(1).data);
+while n < 5
+[xVIS(n),yVIS(n)] = ginput(1);
+hold(handles.TransforAxes,'on'); 
+drawnow;
+plot(xVIS(n), yVIS(n), 'yo', 'MarkerSize', 10);
+n=n+1;
+end
+ points = [xVIS; yVIS]';
+ tform = fitgeotrans(points,points,'NonreflectiveSimilarity');
+  try
+for i = 65 : 93
+  
+ firststring= '_MG_14'
+    number = num2str(i)
+    laststring= 'cropped.JPG'
+    name = strcat(firststring, number, laststring)
+    this_image = imread(name);
+    Jregistered = imwarp(this_image,tform);
+    differential = imabsdiff(first,Jregistered);
+    data1(i).data= differential;
+    end
+catch ME
+  errorMessage = sprintf('Blad! Nieprawidlowe wymiary.', ME.message);
+  fprintf(1, '%s\n', errorMessage);
+  uiwait(warndlg(errorMessage));
+end
+ imshow(data1(65).data,[]);
 
 % --- Executes on button press in next1Btn.
 function next1Btn_Callback(hObject, eventdata, handles)
@@ -523,9 +556,10 @@ function slider2_Callback(hObject, eventdata, handles)
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 global data1
+img =data1([65:end])
 x = int32(get(hObject, 'Value'));
 axes(handles.TransforAxes);
-imshow(data1(x).data);
+imshow(img(x).data);
 
 % --- Executes during object creation, after setting all properties.
 function slider2_CreateFcn(hObject, eventdata, handles)
