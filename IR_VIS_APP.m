@@ -428,7 +428,59 @@ function stat2Btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stat2Btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global data3;
+global folderIR
+global data2
+n=1;
+while n < 2
+[xIR(n),yIR(n)] = ginput(1);
+drawnow;
+n=n+1;
+end
 
+listBoxStrings2 = cellstr(get(handles.listboxIR,'String'));
+ 
+this_name = listBoxStrings2{1};
+this_image_file = fullfile(folderIR, this_name ); 
+this_image_IR = imread(this_image_file);
+
+temp1 = rgb2gray(this_image_IR);
+temp2 = rgb2gray(data2(1).data);
+temp3 = rgb2gray(data3(1).data);
+
+tempVal1=double(2/(double(max(temp1(1,:))-min(temp1(1,:)))));
+tempVal2=double(2/(double(max(temp2(1,:))-min(temp2(1,:)))));
+tempVal3=double(2/(double(max(temp3(1,:))-min(temp3(1,:)))));
+t1=[];
+t2=[];
+t3=[];
+startTemp=28;
+for i=2:30
+this_name = listBoxStrings2{i};
+this_image_file = fullfile(folderIR, this_name ); 
+this_image_IR = imread(this_image_file);
+I1 = imcrop(rgb2gray(this_image_IR),[xIR-2 yIR-2 5 5]);
+meanI1 = mean(mean(I1));
+value1=startTemp + (meanI1*tempVal1);
+t1=[t1 value1];
+I2 = imcrop(rgb2gray(data2(i).data),[xIR-2 yIR-2 5 5]);
+meanI2 = mean(mean(I2));
+value2=startTemp + (meanI2*tempVal2);
+t2=[t2 value2];
+I3 = imcrop(rgb2gray(data2(i).data),[xIR-2 yIR-2 5 5]);
+meanI3 = mean(mean(I3));
+value3=startTemp + (meanI3*tempVal3);
+t3=[t3 value3];
+end
+time = 1:29;
+axes(handles.origAxes);
+plot(time,t1)
+
+axes(handles.trans1Axes);
+plot(time,t2)
+
+axes(handles.trans2Axes); 
+plot(time,t3)
 
 % --- Executes on button press in trans2Btn.
 function trans2Btn_Callback(hObject, eventdata, handles)
