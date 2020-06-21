@@ -436,63 +436,114 @@ function trans2Btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
- global data1
- global folderVIS
-% global differential
- 
-  listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
-  getFirstImage = listBoxStrings{1};
-  this_image_file1 = fullfile(folderVIS, getFirstImage ); 
-  readFirstImage = imread(this_image_file1);
-  axes(handles.TransforAxes);
-  imshow(readFirstImage);
-  [x, rect] = imcrop(readFirstImage) ;
-  num_selected = length(listBoxStrings);
 
+global folderVIS
+global xIR;
+global yIR;
+global xVIS;
+global yVIS;
+global data2;
+global data3;
+listBoxStrings = cellstr(get(handles.listboxVIS,'String'));
+
+this_name = listBoxStrings{1};
+this_image_file = fullfile(folderVIS, this_name ); 
+this_image2 = imread(this_image_file);
+[y,x,z] = size(this_image2);
+xProc = x*0.05;
+yProc = y*0.05;
+minX=min(xVIS);
+minY=min(yVIS);
+maxX=min(xVIS);
+maxY=min(xVIS);
+data1(1).data= this_image2;
+num_selected = length(listBoxStrings);
+I2 = imcrop(this_image2,[minX-xProc minY-yProc maxX+xProc maxY+yProc]);
+data1(1).data= I2;
+for K = 2 : num_selected
+  this_name = listBoxStrings{K};
+  this_image_file = fullfile(folderVIS, this_name ); 
+  this_image = imread(this_image_file);
+  I3 = imcrop(this_image,[minX-xProc minY-yProc maxX+xProc maxY+yProc]);
+data1(K).data = imabsdiff(I3,I2);
+end
 for K = 1 : num_selected
-     this_name = listBoxStrings{K};
-     this_image_file = fullfile(folderVIS, this_name ); 
-     readFirstImage = imread(this_image_file);
-
-     readFirstImage = imcrop(readFirstImage,rect) ;           % crop image 
-     [filepath,name,ext] = fileparts(this_image_file) ;
-     imwrite(readFirstImage,strcat(name,'cropped',ext)) ;   % Save image 
-
+this_image_VIS=data1(K).data;
+this_image_IR=data2(K).data;
+[y, x, z] = size(this_image_VIS);
+picture_Vis = uint8(zeros(y*2, x*2, z));
+picture_Vis(floor(y/2):y+floor(y/2)-1, floor(x/2):x+floor(x/2)-1, :) = this_image_VIS;
+picture_Vis_X = xVIS + floor(x/2)-1;
+picture_Vis_Y = yVIS + floor(y/2)-1;
+    
+VisMinX = find(picture_Vis_X == min(picture_Vis_X));
+VisMaxX = find(picture_Vis_X == max(picture_Vis_X));
+VisMinY = find(picture_Vis_Y == min(picture_Vis_Y));
+VisMaxY = find(picture_Vis_Y == max(picture_Vis_Y));
+    
+IrMinX = find(xIR == min(xIR));
+IrMaxX = find(xIR == max(xIR));
+IrMinY = find(yIR == min(yIR));
+IrMaxY = find(yIR == max(yIR));   
+IrX = picture_Vis_X(VisMinX) - xIR(IrMinX);
+IrXResult = xIR + IrX;
+    
+VisXDist = picture_Vis_X(VisMaxX) - picture_Vis_X(VisMinX);
+IrXDist = xIR(IrMaxX) - xIR(IrMinX);
+AsX = mean(IrXDist) / mean(VisXDist);  
+[y,x,z] = size(picture_Vis);
+VisCropXres = picture_Vis_X * AsX;        
+IrY = mean(picture_Vis_Y(VisMinY)) - mean(yIR(IrMinY));
+IrYResult = yIR + IrY;
+VisYDist = picture_Vis_Y(VisMaxY) - picture_Vis_Y(VisMinY);
+IrYDist = yIR(IrMaxY) - yIR(IrMinY);
+AsY = mean(IrYDist) / mean(VisYDist);
+VisCropYres = picture_Vis_Y * AsY;
+    
+mergerdIMG = [];
+mergerdIMG = imresize(picture_Vis, [y*AsY, x*AsX]);
+    
+IrMeanX = mean(xIR);
+IrMeanY = mean(yIR);
+VisMeanX = mean(VisCropXres);
+VisMeanY = mean(VisCropYres);  
+difX = abs(VisMeanX) - abs(IrMeanX);
+difY = abs(VisMeanY) - abs(IrMeanY);
+[y,x,z] = size(this_image_IR);  
+[y1, x1, z1] = size(mergerdIMG);
+    
+maxX = x+difX-1;
+maxY = y+difY-1;
+if maxY > y1
+	yDiff = maxY - y;
+	maxY = y1 - 1;
 end
- first = imread('_MG_1464cropped.JPG');
- axes(handles.TransforAxes);
- imshow(first);
- n=1;
- global xVIS;
- global yVIS;
+if maxX > x1
+	xDiff = maxX - x;
+	maxX = x1 - 1;
+end
+    
+croppedVis = mergerdIMG(difY:maxY, difX:maxX, :); 
+[s1,s2,s3]=size(croppedVis)
+if(s2~= x) 
+ croppedVis = mergerdIMG(difY:maxY, maxX-x:maxX-1, :);    
+end
+[y,x,z] = size(this_image_IR);
+maskProg = ones(y,x);
+level = graythresh(this_image_IR(:,:,1));
+maskProg = im2bw(this_image_IR(:,:,1), level);
+maskProg3 = repmat(maskProg, [1, 1, 3]);
+imCropMasked = croppedVis;
+imCropMasked(~maskProg3) = 0;
+VisPlusIr = imCropMasked;
+VisPlusIr(:,:,1) =  VisPlusIr(:,:,1)/2 + this_image_IR(:,:,1)/2 ;
+VisPlusIr(:,:,2) = VisPlusIr(:,:,2)/2 + this_image_IR(:,:,2)/2 ;
+VisPlusIr(:,:,3) = VisPlusIr(:,:,3)/2 + this_image_IR(:,:,3)/2 ;
+data3(K).data=VisPlusIr;
+end
+axes(handles.TransforAxes);
+imshow(data3(1).data);
 
-while n < 5
-[xVIS(n),yVIS(n)] = ginput(1);
-hold(handles.TransforAxes,'on'); 
-drawnow;
-plot(xVIS(n), yVIS(n), 'yo', 'MarkerSize', 10);
-n=n+1;
-end
- points = [xVIS; yVIS]';
- tform = fitgeotrans(points,points,'NonreflectiveSimilarity');
-  try
-for i = 65 : 93
-  
- firststring= '_MG_14'
-    number = num2str(i)
-    laststring= 'cropped.JPG'
-    name = strcat(firststring, number, laststring)
-    this_image = imread(name);
-    Jregistered = imwarp(this_image,tform);
-    differential = imabsdiff(first,Jregistered);
-    data1(i).data= differential;
-    end
-catch ME
-  errorMessage = sprintf('Blad! Nieprawidlowe wymiary.', ME.message);
-  fprintf(1, '%s\n', errorMessage);
-  uiwait(warndlg(errorMessage));
-end
- imshow(data1(65).data,[]);
 
 % --- Executes on button press in next1Btn.
 function next1Btn_Callback(hObject, eventdata, handles)
@@ -555,11 +606,10 @@ function slider2_Callback(hObject, eventdata, handles)
 
 % Hints: get(hObject,'Value') returns position of slider
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-global data1
-img =data1([65:end])
+global data3
 x = int32(get(hObject, 'Value'));
 axes(handles.TransforAxes);
-imshow(img(x).data);
+imshow(data3(x).data);
 
 % --- Executes during object creation, after setting all properties.
 function slider2_CreateFcn(hObject, eventdata, handles)
