@@ -449,12 +449,11 @@ temp2 = rgb2gray(data2(1).data);
 temp3 = rgb2gray(data3(1).data);
 
 tempVal1=double(40/(double(max(temp1(1,:))-min(temp1(1,:)))));
-tempVal2=double(40/(double(max(temp2(1,:))-min(temp2(1,:)))));
-tempVal3=double(40/(double(max(temp3(1,:))-min(temp3(1,:)))));
+
 t1=[];
 t2=[];
 t3=[];
-startTemp=28;
+startTemp=10;
 for i=2:30
 this_name = listBoxStrings2{i};
 this_image_file = fullfile(folderIR, this_name ); 
@@ -465,11 +464,11 @@ value1=startTemp + (meanI1*tempVal1);
 t1=[t1 value1];
 I2 = imcrop(rgb2gray(data2(i).data),[xIR-2 yIR-2 5 5]);
 meanI2 = mean(mean(I2));
-value2=startTemp + (meanI2*tempVal2);
+value2=startTemp + (meanI2*tempVal1);
 t2=[t2 value2];
 I3 = imcrop(rgb2gray(data2(i).data),[xIR-2 yIR-2 5 5]);
 meanI3 = mean(mean(I3));
-value3=startTemp + (meanI3*tempVal3);
+value3=startTemp + (meanI3*tempVal1);
 t3=[t3 value3];
 end
 time = 1:29;
