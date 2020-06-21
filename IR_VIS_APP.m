@@ -448,9 +448,9 @@ temp1 = rgb2gray(this_image_IR);
 temp2 = rgb2gray(data2(1).data);
 temp3 = rgb2gray(data3(1).data);
 
-tempVal1=double(2/(double(max(temp1(1,:))-min(temp1(1,:)))));
-tempVal2=double(2/(double(max(temp2(1,:))-min(temp2(1,:)))));
-tempVal3=double(2/(double(max(temp3(1,:))-min(temp3(1,:)))));
+tempVal1=double(40/(double(max(temp1(1,:))-min(temp1(1,:)))));
+tempVal2=double(40/(double(max(temp2(1,:))-min(temp2(1,:)))));
+tempVal3=double(40/(double(max(temp3(1,:))-min(temp3(1,:)))));
 t1=[];
 t2=[];
 t3=[];
